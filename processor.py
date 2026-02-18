@@ -44,13 +44,15 @@ def get_category(image_path):
     """
     try:
         # Step 1: YOLO Detection
-        # We verify if it's likely a screen content or just process it as requested.
-        # Even if we don't act strictly on detections yet, this fulfills the "first use yolo" requirement.
         detections = detect_objects(image_path)
-        # Optional: You could add logic here to filter out non-screenshots if needed
-        # e.g., if 'person' in detections and no 'tv' or 'laptop', maybe ignoring it?
-        # For now, we log it and proceed to OCR efficiently.
         print(f"DEBUG: Detections in {os.path.basename(image_path)}: {detections}")
+
+        # Check if any detected object maps to a category
+        for detection in detections:
+            if detection in config.OBJECT_CATEGORIES:
+                category = config.OBJECT_CATEGORIES[detection]
+                print(f"DEBUG: Mapped object '{detection}' to category '{category}'")
+                return category
 
         # Step 2: OCR Text Extraction
         img = Image.open(image_path)
