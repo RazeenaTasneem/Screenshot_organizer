@@ -1,3 +1,6 @@
 watchdog
+tesseract
 pytesseract
 pillow
+ultralytics
+opencv-python
