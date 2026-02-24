@@ -1,13 +1,17 @@
-
 import os
 
-SOURCE_DIR = r"C:\Users\LENOVO\OneDrive\图片\Screenshots"
-TARGET_DIR = r"C:\Users\LENOVO\OneDrive\图片\Screenshots\Organised"
+# SOURCE_DIR = r"C:\Users\LENOVO\OneDrive\图片\Screenshots"
+# TARGET_DIR = r"C:\Users\LENOVO\OneDrive\图片\Screenshots\Organised"
+
+SOURCE_DIR = r"C:\Users\nn981\OneDrive\รูปภาพ\Screenshots"
+TARGET_DIR = r"C:\Users\nn981\OneDrive\รูปภาพ\Screenshots\Organised"
 
 
 # Tesseract-OCR Configuration used by processor.py
 # IMPORTANT: This path must point to your tesseract.exe installation
-TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+TESSERACT_PATH = r"C:\Users\nn981\AppData\Local\Programs\Tessaract_OCR\tesseract.exe"
 
 # YOLO Configuration
 # This will automatically download the model if not present
