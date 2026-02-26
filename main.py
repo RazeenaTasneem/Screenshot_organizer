@@ -1,11 +1,16 @@
 import time
 import os
 import shutil
+import queue
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import config
 import processor
+import ui_popup
+
+# Queue to handle threading issues between Watchdog and Tkinter
+event_queue = queue.Queue()
 
 class ScreenshotHandler(FileSystemEventHandler):
     def on_created(self, event):
@@ -16,31 +21,48 @@ class ScreenshotHandler(FileSystemEventHandler):
         if not file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
             return
 
-
         # Wait a bit for the file to be fully written
         time.sleep(2)
         
-        print(f"Processing: {os.path.basename(file_path)}")
-        try:
-            category = processor.get_category(file_path)
-            if category == "Unprocessed_Errors":
-                print(f"Warning: Could not categorize {os.path.basename(file_path)}. Moving to 'Unprocessed_Errors'.")
-        except Exception as e:
-            print(f"Error processing {file_path}: {e}")
-            category = "Unprocessed_Errors"
+        print(f"Detected: {os.path.basename(file_path)}")
+        event_queue.put(file_path)
+
+def process_screenshot(file_path):
+    print(f"Processing: {file_path}")
+    try:
+        category, text = processor.analyze_screenshot(file_path)
+        smart_name = processor.generate_smart_name(text, category)
         
-        dest_folder = os.path.join(config.TARGET_DIR, category)
-        try:
-            os.makedirs(dest_folder, exist_ok=True)
+        # Show UI Popup in Main Thread
+        result = ui_popup.show_popup(file_path, smart_name, category)
+        
+        if not result["confirmed"]:
+            print(f"User cancelled saving {os.path.basename(file_path)}. Deleting file.")
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            return
             
-            timestamp = datetime.now().strftime(config.DATETIME_FORMAT)
-            new_filename = f"{timestamp}.png"
-            dest_path = os.path.join(dest_folder, new_filename)
-            
-            shutil.move(file_path, dest_path)
-            print(f"Organized: {new_filename} -> {category}\n")
-        except Exception as e:
-            print(f"Movement Error for {file_path}: {e}")
+        final_name = result["name"]
+        final_category = result["category"]
+        
+    except Exception as e:
+        print(f"Error processing {file_path}: {e}")
+        final_category = "Unprocessed_Errors"
+        final_name = "error"
+    
+    dest_folder = os.path.join(config.TARGET_DIR, final_category)
+    
+    try:
+        os.makedirs(dest_folder, exist_ok=True)
+        
+        timestamp = datetime.now().strftime("%H-%M-%S")
+        new_filename = f"{final_name}-{timestamp}.png"
+        dest_path = os.path.join(dest_folder, new_filename)
+        
+        shutil.move(file_path, dest_path)
+        print(f"Organized: {new_filename} -> {dest_folder}\n")
+    except Exception as e:
+        print(f"Movement Error for {file_path}: {e}")
 
 if __name__ == "__main__":
 
@@ -64,7 +86,12 @@ if __name__ == "__main__":
     
     try:
         while True:
-            time.sleep(1)
+            # Check for new items in the queue every half second
+            try:
+                file_path = event_queue.get(timeout=0.5)
+                process_screenshot(file_path)
+            except queue.Empty:
+                pass
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
