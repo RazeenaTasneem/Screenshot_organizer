@@ -4,4 +4,3 @@ pytesseract
 pillow
 ultralytics
 opencv-python
-google-generativeai

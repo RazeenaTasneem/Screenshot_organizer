@@ -17,11 +17,6 @@ TESSERACT_PATH = r"C:\Users\nn981\AppData\Local\Programs\Tessaract_OCR\tesseract
 # This will automatically download the model if not present
 YOLO_MODEL_PATH = 'yolov8n.pt' 
 
-# Gemini API Configuration for Smart Naming
-# Please set your Gemini API key here. You can get a free key from Google AI Studio.
-GEMINI_API_KEY = "AIzaSyC4gZllfqlTkOs7ZB6qvfW-wFeYGOhd490"
-
-
 CATEGORIES = {
     "Coding/Python": [
         "def ", "if __name__ ==", "import os", "print(f", "elif ", "range(", "plt.", "pandas as", "numpy as", "class "
